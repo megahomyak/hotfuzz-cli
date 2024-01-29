@@ -46,16 +46,24 @@ fn main() {
 
     let window = pancurses::initscr();
     window.keypad(true); // To handle arrows
+    pancurses::noecho();
+    pancurses::nl();
+    pancurses::cbreak();
     let (mut width, mut height) = window.get_max_yx();
     loop {
+        println!("{width} {height}");
+        window.mvaddch(width, height, 'X');
         match window.getch() {
-            Some(Input::KeyResize) => (width, height) = window.get_max_yx(),
+            Some(Input::KeyResize) => {
+                pancurses::resize_term(0, 0);
+                (width, height) = window.get_max_yx()
+            },
             Some(Input::KeyUp) => up(),
             Some(Input::KeyDown) => down(),
             Some(Input::KeyEnter | Input::Character('\n')) => select(),
             Some(Input::Character('\x1b')) => break, // "Escape"
             _ => (),
         }
-        println!("tick");
     }
+    pancurses::endwin();
 }
